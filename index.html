@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <titlei>Infovis</title>
+  <title>Infovis</title>
 	<meta charset="utf-8" />
 
   <link href="http://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
@@ -37,6 +37,70 @@
       })
       .text(function (d,i) { return d[0]+ " "; });
    </script>
+
+   <h2>Bar chart with SVG</h2>
+   <div style="color:#4AE85D">
+   		<text> Agree </text>
+   </div>
+   <div style="color:#C6CCC7"> 
+   		<text> Neutral </text>
+   </div>
+   <div style="color:#FF3636"> 
+   		<text> Disagree </text>
+   </div>
+   <svg id="bar-chart" width="900" height="300"></svg>
+        <script>
+          var datos = [ { "question": "I felt an emotional relation", "stats": [66, 22, 12] },
+          {"question": "I learned something new about the text", "stats":	[63, 24, 13]},
+          {"question": "It confirmed my understanding of the text",	"stats": [57,	33,	10]},
+          {"question": "It jogged my memory",	"stats": [50,	35, 15]},
+          {"question": "The Wordle confused me", "stats": [5, 9, 86]} ];
+          var colors = [ "#4AE85D", "#C6CCC7", "#FF3636"];
+          var g = d3.select("#bar-chart").selectAll("g")
+             .data(datos)
+             .enter()
+             .append("g")
+             .attr("transform", function(d,i) { return "translate(10, " + (i+1)*22 + ")"});
+             g.append("text")
+             .attr("y","10")
+             .attr("dy",".35em")
+             .text(function(d,i) { return d.question });
+             g.append("rect")
+             .attr("height", "19")
+             .attr("x","300")
+             .attr("style",function(d,i){ return "fill:" + colors[0] })
+             .attr("width",function(d,i){ return d.stats[0] * 2 });
+             g.append("text")
+             .attr("x",function(d,i){ return 300 + d.stats[0] -5 })
+             .attr("y","10")
+             .attr("dy",".35em")
+             .text(function(d,i) { return d.stats[0]});
+             g.append("rect")
+             .attr("height", "19")
+             .attr("x",function(d,i){ return 300 + d.stats[0] * 2 })
+             .attr("style",function(d,i){ return "fill:" + colors[1] })
+             .attr("width",function(d,i){ return d.stats[1] * 2});
+             g.append("text")
+             .attr("x",function(d,i){ return 300 + d.stats[0] * 2 + d.stats[1] -5 })
+             .attr("y","10")
+             .attr("dy",".35em")
+             .text(function(d,i) { return d.stats[1]});
+             g.append("rect")
+             .attr("height", "19")
+             .attr("x",function(d,i){ return 300 + d.stats[0] * 2+ d.stats[1] * 2 })
+             .attr("style",function(d,i){ return "fill:" + colors[2] })
+             .attr("width",function(d,i){ return d.stats[2] * 2});
+             g.append("text")
+             .attr("x",function(d,i){ return 300 + d.stats[0] * 2 + d.stats[1] * 2 + d.stats[2] -5 })
+             .attr("y","10")
+             .attr("dy",".35em")
+             .text(function(d,i) { return d.stats[2]});
+             g.append("text")
+             .attr("y","10")
+             .attr("dy",".35em")
+             .attr("x",function(d,i){ return 300 + d.stats[0] * 2+ d.stats[1] * 2 +d.stats[2] * 2 + 20})
+             .text(function(d,i) { return d.stats[0] + d.stats[1] + d.stats[2]});
+        </script>
 </body>
 </html>
 
