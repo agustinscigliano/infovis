@@ -104,7 +104,7 @@ div.dc-chart {
 }
 
 .dc-chart .brush rect.extent {
-    fill: steelblue;
+    fill: brown;
     fill-opacity: .125;
 }
 
