@@ -96,7 +96,7 @@
           dateDim  = ndx.dimension(function(d) { return d.date; }),
           weekDay = ndx.dimension(function(d) { return d.day; }),
           weekDay2 = ndx.dimension(function(d) { return d.day; }),
-          runDays  = runDim.filter(function(d) { if(d != "0") return d;  } ),
+          runDays  = workedMin.filter(function(d) { if(d != "0") return d;  } ),
           perDay  = weekDay.group().reduceCount(),
           workPerDay = weekDay.group().reduceSum(function(d) {return d.workedMin;}),
           workPerDay2 = weekDay2.group().reduceSum(function(d) {return d.workedMin;}),
