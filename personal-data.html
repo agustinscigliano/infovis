@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Infovis - Trabajo de datos personales</title>
+  <title>Infovis - Personal Data</title>
 	<meta charset="utf-8" />
 
   <link href="http://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
@@ -34,33 +34,32 @@
     </div>
   </nav>
   <div class="content">
-    <h4>Does sleep time influence my running performance?</h4>
-    <h4>Does running improve my sleep?</h4>
+    <h4>How much do I actually work/produce</h4>
+    <h4>Does my perfomance change depending on the day?</h4>
     <p>
-      Based on my Fitbit HR data and Nike+ running app data, I try to figure out if sleep influences my runs and/or the other way around. Also, I show some other representations of the data.
+      Based on my dashboard of work, I measured my performance at work and how much time do I spend on actual work and how much time I "waste"
       <br>
-      These visualizations use differente frameworks/libraries, just to give them a try.
     </p>
 
-    <h3>Several interactive charts</h3>
-    <p>Using <a href="https://dc-js.github.io/dc.js/" target="_blank">DCjs</a> and <a href="http://square.github.io/crossfilter/" target="_blank">Crossfilter</a>.</p>
+    <h3>Interactive charts</h3>
+    <p>Using DCjs and Crossfilter.</p>
     <div class="offset-by-one column">
       <div>
         <div class="columns three">
-          Días que corrí:
-          <div id="chart-ring-day"></div>
+          Hours worked by day:
+          <div id="chart-hours-day"></div>
         </div>
         <div class="columns three">
-          Horas que dormí por noche:
-          <div id="chart-sleep-proportion"></div>
+          Hours worked in one day:
+          <div id="chart-day-proportion"></div>
         </div>
       </div>
-      <div id="chart-run"></div>
+      <div id="chart-minutes"></div>
     </div>
 
 <style>
       .column-chart rect {
-        fill: steelblue;
+        fill: brown;
       }
       .column-chart text {
         fill: white;
@@ -68,16 +67,16 @@
         text-anchor: middle;
       }
       .axis text {
-        font: 10px sans-serif;
+        font: 9px sans-serif;
         fill: black;
       }
       .axis path,
       .axis line {
         fill: none;
         stroke: #000;
-        shape-rendering: crispEdges;
+        shape-rendehours: crispEdges;
       }
-      .sleep-chart text, .mixed-chart text {
+      .day-chart text, .mixed-chart text {
         fill: black;
         font: 10px sans-serif;
         text-anchor: middle;
@@ -87,38 +86,41 @@
 <script>
         
         $.getJSON('data/datos2.json', function(data){
-          var runDayRingChart   = dc.pieChart("#chart-ring-day"),
-          runChart  = dc.barChart("#chart-run");
-          sleepProportionChart = dc.pieChart("#chart-sleep-proportion");
+          var runDayhoursChart   = dc.pieChart("#chart-hours-day"),
+          minutesChart  = dc.barChart("#chart-minutes");
+          dayProportionChart = dc.pieChart("#chart-day-proportion");
           var ndx = crossfilter(data),
           atWorkMin  = ndx.dimension(function(d) { return d.atworkMinutes; }),
           workedMin = ndx.dimension(function(d) { return d.workedMinutes; }),
           dateDim  = ndx.dimension(function(d) { return d.date; }),
           weekDay = ndx.dimension(function(d) { return d.day; }),
           weekDay2 = ndx.dimension(function(d) { return d.day; }),
-          runDays  = workedMin.filter(function(d) { if(d != "0") return d;  } ),
+          workedDays  = atWorkMin.filter(function(d) { if(d != "0") return d;  } ),
           perDay  = weekDay.group().reduceCount(),
-          workPerDay = weekDay.group().reduceSum(function(d) {return d.workedMin;}),
-          workPerDay2 = weekDay2.group().reduceSum(function(d) {return d.workedMin;}),
-          perInterval = atWorkMin.group(function(d) { return Math.floor(d/60) }).reduceCount();
-          runDayRingChart
+          totalDaysWorked = ndx.groupAll().reduceCount().value(),
+          perDay2 = weekDay.group().reduceSum(function(d) {return d.workedMinutes/60; }),
+          atWorkPerDay = weekDay2.group().reduceSum(function(d) {return d.atworkMinutes;}),
+          workPerDay = workedMin.group().reduceSum(function(d) {return d.day;}),
+          perInterval2 = workedMin.group(function(d) { return Math.floor(d/60) }).reduceCount(),
+          perInterval = weekDay.group(function(d) { return Math.floor(atWorkMin/workedMin) }).reduceCount();
+          runDayhoursChart
               .width(200).height(200)
               .dimension(weekDay)
-              .group(perDay)
+              .group(perDay2)
               .innerRadius(40);
-          runChart
+          minutesChart
               .width(1000).height(300)
-              .dimension(weekDay2)
-              .group(workPerDay2)
+              .dimension(atWorkMin)
+              .group(atWorkPerDay)
               .x(d3.scale.ordinal())
               .xUnits(dc.units.ordinal)
               .elasticX(true)
               .elasticY(true);
-          runChart.yAxis().ticks(4);
-          sleepProportionChart
+          minutesChart.yAxis().ticks(4);
+          dayProportionChart
               .width(200).height(200)
               .dimension(workedMin)
-              .group(perInterval)
+              .group(perInterval2)
               .innerRadius(40);
           dc.renderAll();
           function print_filter(filter){
@@ -126,7 +128,7 @@
           	if (typeof(f.length) != "undefined") {}else{}
           	if (typeof(f.top) != "undefined") {f=f.top(Infinity);}else{}
           	if (typeof(f.dimension) != "undefined") {f=f.dimension(function(d) { return "";}).top(Infinity);}else{}
-          	console.log(filter+"("+f.length+") = "+JSON.stringify(f).replace("[","[\n\t").replace(/}\,/g,"},\n\t").replace("]","\n]"));
+          	console.log(filter+"("+f.length+") = "+JSON.sthoursify(f).replace("[","[\n\t").replace(/}\,/g,"},\n\t").replace("]","\n]"));
           }
         });
     </script>
