@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Infovis - Trabajo de datos personales</title>
+	<meta charset="utf-8" />
+
+  <link href="http://fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/skeleton.css">
+  <link rel="stylesheet" href="css/custom.css">
+  <link rel="stylesheet" href="css/c3.css">
+  <link rel="stylesheet" href="css/dc.css">
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.16/d3.min.js" charset="utf-8"></script>
+  <script src="https://code.jquery.com/jquery-2.2.1.min.js" charset="utf-8"></script>
+  <script src="js/underscore.js" charset="utf-8"></script>
+  <script src="js/moment.js" charset="utf-8"></script>
+  <script src="js/crossfilter.js" type="text/javascript"></script>
+  <script src="js/dc.js" type="text/javascript"></script>
+  <script src="js/geolib.js" charset="utf-8"></script>
+  <script src="js/c3.js" charset="utf-8"></script>
+  <script src="js/dimple.v2.1.6.js"></script>
+
+  </head>
+<body>
+   <div class="navbar-spacer"></div>
+   <nav class="navbar">
+    <div class="container">
+      <ul class="navbar-list">
+        <li class="navbar-item"><a class="navbar-link" href="index.html">Home</a></li>
+        <li class="navbar-item"><a class="navbar-link navbar-chosen" href="personal-data.html">Personal data</a></li>
+      </ul>
+    </div>
+  </nav>
+  <div class="content">
+    <h4>Does sleep time influence my running performance?</h4>
+    <h4>Does running improve my sleep?</h4>
+    <p>
+      Based on my Fitbit HR data and Nike+ running app data, I try to figure out if sleep influences my runs and/or the other way around. Also, I show some other representations of the data.
+      <br>
+      These visualizations use differente frameworks/libraries, just to give them a try.
+    </p>
+
+    <h3>Several interactive charts</h3>
+    <p>Using <a href="https://dc-js.github.io/dc.js/" target="_blank">DCjs</a> and <a href="http://square.github.io/crossfilter/" target="_blank">Crossfilter</a>.</p>
+    <div class="offset-by-one column">
+      <div>
+        <div class="columns three">
+          Días que corrí:
+          <div id="chart-ring-day"></div>
+        </div>
+        <div class="columns three">
+          Horas que dormí por noche:
+          <div id="chart-sleep-proportion"></div>
+        </div>
+      </div>
+      <div id="chart-run"></div>
+    </div>
+
+<style>
+      .column-chart rect {
+        fill: steelblue;
+      }
+      .column-chart text {
+        fill: white;
+        font: 9px sans-serif;
+        text-anchor: middle;
+      }
+      .axis text {
+        font: 10px sans-serif;
+        fill: black;
+      }
+      .axis path,
+      .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+      }
+      .sleep-chart text, .mixed-chart text {
+        fill: black;
+        font: 10px sans-serif;
+        text-anchor: middle;
+      }
+    </style>
+
+<script>
+        
+        $.getJSON('data/datos2.json', function(data){
+          var runDayRingChart   = dc.pieChart("#chart-ring-day"),
+          runChart  = dc.barChart("#chart-run");
+          sleepProportionChart = dc.pieChart("#chart-sleep-proportion");
+          var ndx = crossfilter(data),
+          atWorkMin  = ndx.dimension(function(d) { return d.atworkMinutes; }),
+          workedMin = ndx.dimension(function(d) { return d.workedMinutes; }),
+          dateDim  = ndx.dimension(function(d) { return d.date; }),
+          weekDay = ndx.dimension(function(d) { return d.day; }),
+          weekDay2 = ndx.dimension(function(d) { return d.day; }),
+          runDays  = runDim.filter(function(d) { if(d != "0") return d;  } ),
+          perDay  = weekDay.group().reduceCount(),
+          workPerDay = weekDay.group().reduceSum(function(d) {return d.workedMin;}),
+          workPerDay2 = weekDay2.group().reduceSum(function(d) {return d.workedMin;}),
+          perInterval = atWorkMin.group(function(d) { return Math.floor(d/60) }).reduceCount();
+          runDayRingChart
+              .width(200).height(200)
+              .dimension(weekDay)
+              .group(perDay)
+              .innerRadius(40);
+          runChart
+              .width(1000).height(300)
+              .dimension(weekDay2)
+              .group(workPerDay2)
+              .x(d3.scale.ordinal())
+              .xUnits(dc.units.ordinal)
+              .elasticX(true)
+              .elasticY(true);
+          runChart.yAxis().ticks(4);
+          sleepProportionChart
+              .width(200).height(200)
+              .dimension(workedDim)
+              .group(perInterval)
+              .innerRadius(40);
+          dc.renderAll();
+          function print_filter(filter){
+          	var f=eval(filter);
+          	if (typeof(f.length) != "undefined") {}else{}
+          	if (typeof(f.top) != "undefined") {f=f.top(Infinity);}else{}
+          	if (typeof(f.dimension) != "undefined") {f=f.dimension(function(d) { return "";}).top(Infinity);}else{}
+          	console.log(filter+"("+f.length+") = "+JSON.stringify(f).replace("[","[\n\t").replace(/}\,/g,"},\n\t").replace("]","\n]"));
+          }
+        });
+    </script>
